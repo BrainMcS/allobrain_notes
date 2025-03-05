@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, ConfigDict
 
 
 class NoteBase(BaseModel):
@@ -35,8 +35,7 @@ class NoteVersion(BaseModel):
     content: str
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Note(NoteBase):
@@ -45,8 +44,7 @@ class Note(NoteBase):
     updated_at: datetime
     versions: List[NoteVersion] = []
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class NoteDiff(BaseModel):
