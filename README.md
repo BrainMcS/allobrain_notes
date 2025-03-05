@@ -93,7 +93,7 @@ npm install
 
 3. Start the application:
 ```bash
-npm start
+npm run dev
 ```
 
 The application will start at http://localhost:3000.
