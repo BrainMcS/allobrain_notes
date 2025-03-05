@@ -15,7 +15,7 @@ import NotFound from './components/NotFound';
 function App() {
   return (
     <Router>
-      <div className="app-container">
+      <div className="min-h-screen bg-gray-100">
         <Header />
         <main className="container mx-auto py-6 px-4">
           <Routes>

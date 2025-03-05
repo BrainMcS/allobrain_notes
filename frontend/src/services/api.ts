@@ -35,8 +35,12 @@ export const createNote = async (noteData: NoteFormData): Promise<Note> => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     },
-    body: JSON.stringify(noteData),
+    body: JSON.stringify({
+      title: noteData.title.trim(),
+      content: noteData.content.trim()
+    }),
   });
   return handleApiError(response);
 };
@@ -92,5 +96,13 @@ export const getVersionDiff = async (
 ): Promise<NoteDiff> => {
   const url = `${API_URL}/notes/${noteId}/versions/${versionId}/diff?previous=${compareToPrevious}`;
   const response = await fetch(url);
+  return handleApiError(response);
+};
+
+// Add this function to your existing API service
+export const restoreVersion = async (noteId: number, versionId: number): Promise<Note> => {
+  const response = await fetch(`${API_URL}/notes/${noteId}/versions/${versionId}/restore`, {
+    method: 'POST',
+  });
   return handleApiError(response);
 };
