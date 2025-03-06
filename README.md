@@ -1,165 +1,145 @@
 # Versioned Notes Application
 
-This application allows you to create, edit and manage notes with a complete version history. It's similar to a simplified version control system for your personal notes.
+A full-stack web application that allows users to create, edit, and manage notes with automatic version history tracking.
 
 ## Features
 
-- **Note Management**: Create, edit, and delete notes
-- **Versioning**: Each modification of a note automatically creates a new version
-- **History**: View the complete history of modifications
-- **Version Comparison**: Visualize differences between versions (additions, deletions, modifications)
-- **Restoration**: Ability to revert to a previous version
+- 📝 Create and edit notes with markdown support
+- 🕒 Automatic version history for all changes
+- 📊 Compare different versions of a note
+- 🔄 Revert to any previous version
+- 🔍 View detailed differences between versions
+- 🎨 Clean, responsive UI built with React and Tailwind CSS
 
-## Technical Architecture
+## Tech Stack
 
 ### Backend
-
-- **Language**: Python 3.8+
-- **Framework**: FastAPI
-- **Database**: SQLite (easily replaceable with PostgreSQL in production)
-- **ORM**: SQLAlchemy
+- [FastAPI](https://fastapi.tiangolo.com/) - Modern, fast web framework for building APIs with Python
+- [SQLAlchemy](https://www.sqlalchemy.org/) - SQL toolkit and ORM
+- [SQLite](https://www.sqlite.org/) - Lightweight database for storage
+- [Pydantic](https://pydantic-docs.helpmanual.io/) - Data validation and settings management
 
 ### Frontend
-
-- **Language**: TypeScript
-- **Framework**: React
-- **Routing**: React Router v6
-- **Styles**: TailwindCSS
-- **Notifications**: React-Toastify
+- [React](https://reactjs.org/) (v19) - UI library
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+- [React Router](https://reactrouter.com/) - Routing library for React
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Shadcn/UI](https://ui.shadcn.com/) - Re-usable UI components
+- [Lucide React](https://lucide.dev/) - Icon library
+- [React Toastify](https://fkhadra.github.io/react-toastify/) - Toast notifications
 
 ## Project Structure
 
 ```
-versioned-notes/
+/
+├── backend/              # FastAPI backend
+│   ├── database.py       # Database configuration and models
+│   ├── main.py           # API routes and application setup
+│   ├── models.py         # Pydantic models
+│   ├── utils.py          # Utility functions
+│   └── requirements.txt  # Python dependencies
 │
-├── backend/             # Server code
-│   ├── main.py          # API entry point
-│   ├── database.py      # Database configuration
-│   ├── models.py        # Data models (Pydantic schemas)
-│   └── utils.py         # Utilities (diff, etc.)
-│
-└── frontend/            # User interface code
-    ├── public/          # Static files
-    └── src/             # Source code
-        ├── components/  # React components
-        ├── services/    # API services
-        └── types/       # TypeScript types
+└── frontend/             # React frontend
+    ├── src/
+    │   ├── components/   # React components
+    │   ├── services/     # API service layer
+    │   ├── types/        # TypeScript interfaces
+    │   └── lib/          # Utility functions
+    ├── package.json      # Frontend dependencies
+    └── vite.config.ts    # Vite configuration
 ```
 
-## Installation
+## Getting Started
 
 ### Prerequisites
 
-- Python 3.8+
-- Node.js 14+ and npm
+- Python 3.9+
+- Node.js 18+ and npm/yarn
 
-### Backend
+### Backend Setup
 
-1. Clone the repository:
-```bash
-git clone https://github.com/BrianMcS/allobrain_notes.git
-cd allobrain_notes/backend
-```
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
 
-2. Create a virtual environment and activate it:
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
 3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-4. Start the server:
-```bash
-uvicorn main:app --reload
-```
+4. Run the backend server:
+   ```bash
+   uvicorn main:app --reload
+   ```
 
-The server will start at http://localhost:8000.
+   The API will be available at http://localhost:8000
 
-### Frontend
+### Frontend Setup
 
-1. In another terminal, navigate to the frontend folder:
-```bash
-cd allobrain_notes/frontend
-```
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-```
+   ```bash
+   npm install  # or yarn install
+   ```
 
-3. Start the application:
-```bash
-npm run dev
-```
+3. Start the development server:
+   ```bash
+   npm run dev  # or yarn dev
+   ```
 
-The application will start at http://localhost:3000.
+   The application will be available at http://localhost:5173
 
-## Usage
+## API Endpoints
 
-### Create a new note
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/notes` | GET | Get all notes |
+| `/notes` | POST | Create a new note |
+| `/notes/{id}` | GET | Get a specific note |
+| `/notes/{id}` | PUT | Update a note |
+| `/notes/{id}` | DELETE | Delete a note |
+| `/notes/{id}/versions` | GET | Get all versions of a note |
+| `/notes/{id}/versions/{version_id}` | GET | Get a specific version |
+| `/notes/{id}/revert/{version_id}` | POST | Revert to a previous version |
+| `/notes/{id}/versions/{version_id}/diff` | GET | Get differences between versions |
 
-1. Click on "New Note" in the navigation bar
-2. Enter a title and content
-3. Click "Create"
+## Development
 
-### Edit a note
-
-1. Click on a note in the list
-2. Click "Edit" in the top right corner
-3. Make your changes
-4. Click "Update"
-
-### View version history
-
-1. Click on a note in the list
-2. Click "Versions" in the top right corner
-3. The list of versions will be displayed, from newest to oldest
-
-### View a specific version
-
-1. In the version list, click "View" next to the desired version
-2. The differences with the previous or current version will be displayed
-
-### Restore a previous version
-
-1. In the version view, click "Restore this version"
-2. Confirm the restoration
-3. A new version will be created with the content of the old version
-
-## API Documentation
-
-An interactive API documentation is available at http://localhost:8000/docs when the server is running.
-
-## Tests
-
-### Backend
+### Running Tests
 
 ```bash
+# Backend tests
 cd backend
 pytest
+
+# Frontend tests
+cd frontend
+npm run test  # or yarn test
 ```
 
-### Frontend
+### Building for Production
 
 ```bash
+# Build the frontend
 cd frontend
-npm test
+npm run build  # or yarn build
+
+# Serve the backend with the built frontend
+cd backend
+uvicorn main:app
 ```
-
-## Possible Improvements
-
-- User authentication
-- Note sharing between users
-- Note export (Markdown, PDF, etc.)
-- Tags/categories to organize notes
-- Note search
-- Offline synchronization
-- Mobile interface (PWA)
 
 ## License
 
-MIT
+[MIT](LICENSE)
