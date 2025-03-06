@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -10,10 +9,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  // Add this to see more detailed build info
-  build: {
-    sourcemap: true,
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
   },
-  // Add this for more detailed logs
-  logLevel: 'info',
 })

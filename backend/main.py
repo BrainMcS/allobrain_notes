@@ -7,6 +7,7 @@ from typing import List, Optional
 from database import get_db, create_tables, DBNote, DBNoteVersion
 from models import Note, NoteCreate, NoteUpdate, NoteVersion, NoteDiff
 from utils import compare_versions
+from sqlalchemy.orm import joinedload
 
 # Initialize the FastAPI application
 app = FastAPI(title="Versioned Notes API")
@@ -33,14 +34,52 @@ def read_root():
 @app.get("/notes", response_model=List[Note])
 def get_notes(db: Session = Depends(get_db)):
     """Get all notes"""
-    notes = db.query(DBNote).all()
-    return notes
+    try:
+        print("Fetching all notes")  # Debug log
+        print("Database session status:", db.is_active)
+        
+        # Query notes with eager loading of versions
+        notes = db.query(DBNote).options(
+            joinedload(DBNote.versions)
+        ).all()
+        
+        print(f"Found {len(notes)} notes")  # Debug log
+        
+        # Convert to Pydantic models
+        return [
+            Note(
+                id=note.id,
+                title=note.title,
+                content=note.content,
+                created_at=note.created_at,
+                updated_at=note.updated_at,
+                versions=[
+                    NoteVersion(
+                        id=v.id,
+                        note_id=v.note_id,
+                        title=v.title,
+                        content=v.content,
+                        created_at=v.created_at
+                    ) for v in note.versions
+                ]
+            ) for note in notes
+        ]
+        
+    except Exception as e:
+        print(f"Error fetching notes: {str(e)}")  # Debug log
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error fetching notes: {str(e)}"
+        )
 
 
 @app.post("/notes", response_model=Note, status_code=status.HTTP_201_CREATED)
 async def create_note(note: NoteCreate, db: Session = Depends(get_db)):
     """Create a new note with its first version"""
     try:
+        # Log incoming request data
+        print(f"Received request data: {note.dict()}")
+        
         now = datetime.datetime.utcnow()
         
         # Create the note
@@ -51,8 +90,17 @@ async def create_note(note: NoteCreate, db: Session = Depends(get_db)):
             updated_at=now
         )
         db.add(db_note)
-        db.commit()
-        db.refresh(db_note)
+        try:
+            db.commit()
+            db.refresh(db_note)
+            print(f"Note created with ID: {db_note.id}")
+        except Exception as e:
+            db.rollback()
+            print(f"Database error creating note: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Database error: {str(e)}"
+            )
         
         # Create the first version
         db_version = DBNoteVersion(
@@ -62,55 +110,103 @@ async def create_note(note: NoteCreate, db: Session = Depends(get_db)):
             created_at=now
         )
         db.add(db_version)
-        db.commit()
-        db.refresh(db_note)
+        try:
+            db.commit()
+            db.refresh(db_note)
+        except Exception as e:
+            db.rollback()
+            print(f"Database error creating version: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Database error: {str(e)}"
+            )
         
-        return db_note
+        # Convert to Pydantic model for response
+        return Note(
+            id=db_note.id,
+            title=db_note.title,
+            content=db_note.content,
+            created_at=db_note.created_at,
+            updated_at=db_note.updated_at,
+            versions=[NoteVersion(
+                id=v.id,
+                note_id=v.note_id,
+                title=v.title,
+                content=v.content,
+                created_at=v.created_at
+            ) for v in db_note.versions]
+        )
         
     except Exception as e:
         db.rollback()
+        print(f"Unexpected error: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=str(e)
         )
-    now = datetime.datetime.utcnow()
-    
-    # Create the note with all required fields
-    db_note = DBNote(
-        title=note.title,
-        content=note.content,
-        created_at=now,
-        updated_at=now,
-        versions=[]  # Initialize empty versions list
-    )
-    db.add(db_note)
-    db.commit()
-    db.refresh(db_note)
-    
-    # Create the first version
-    db_version = DBNoteVersion(
-        note_id=db_note.id,
-        title=note.title,
-        content=note.content,
-        created_at=now
-    )
-    db.add(db_version)
-    db.commit()
-    
-    # Refresh the note to include the new version
-    db.refresh(db_note)
-    
-    # Return the note with its relationships loaded
-    return db_note
 
 
 @app.get("/notes/{note_id}", response_model=Note)
 def get_note(note_id: int, db: Session = Depends(get_db)):
     """Get a note by its ID"""
-    note = db.query(DBNote).filter(DBNote.id == note_id).first()
-    if note is None:
-        raise HTTPException(status_code=404, detail="Note not found")
-    return note
+    try:
+        print(f"Fetching note with ID: {note_id}")  # Debug log
+        
+        # Add debug logging for database connection
+        print("Database session status:", db.is_active)
+        
+        # Query the note with eager loading of versions
+        note = db.query(DBNote).options(
+            joinedload(DBNote.versions)
+        ).filter(DBNote.id == note_id).first()
+        
+        print(f"Query result: {note}")  # Debug log
+        
+        if note is None:
+            print(f"Note {note_id} not found")  # Debug log
+            raise HTTPException(status_code=404, detail="Note not found")
+        
+        try:
+            # Convert to Pydantic model with error checking
+            note_dict = {
+                "id": note.id,
+                "title": note.title,
+                "content": note.content,
+                "created_at": note.created_at,
+                "updated_at": note.updated_at,
+                "versions": []
+            }
+            
+            # Add versions if they exist
+            if hasattr(note, 'versions'):
+                note_dict["versions"] = [
+                    {
+                        "id": v.id,
+                        "note_id": v.note_id,
+                        "title": v.title,
+                        "content": v.content,
+                        "created_at": v.created_at
+                    }
+                    for v in note.versions
+                ]
+            
+            return Note(**note_dict)
+            
+        except Exception as conversion_error:
+            print(f"Error converting note to Pydantic model: {str(conversion_error)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error processing note data: {str(conversion_error)}"
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error fetching note {note_id}: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error fetching note: {str(e)}"
+        )
 
 
 @app.put("/notes/{note_id}", response_model=Note)

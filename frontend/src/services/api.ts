@@ -1,7 +1,7 @@
 // src/services/api.ts
 import { Note, NoteVersion, NoteDiff, NoteFormData, ApiError } from '../types';
 
-const API_URL = 'http://localhost:8000';  // Remove /api since backend doesn't use it
+const API_URL = '/api'; // Update to point to the FastAPI backend
 
 // Helper function to handle API errors
 const handleApiError = async (response: Response): Promise<any> => {
