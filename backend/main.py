@@ -14,10 +14,11 @@ app = FastAPI(title="Versioned Notes API")
 # Configure CORS to allow requests from the frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify the exact origin
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Create tables at application startup
@@ -37,22 +38,69 @@ def get_notes(db: Session = Depends(get_db)):
 
 
 @app.post("/notes", response_model=Note, status_code=status.HTTP_201_CREATED)
-def create_note(note: NoteCreate, db: Session = Depends(get_db)):
+async def create_note(note: NoteCreate, db: Session = Depends(get_db)):
     """Create a new note with its first version"""
-    db_note = DBNote(title=note.title, content=note.content)
+    try:
+        now = datetime.datetime.utcnow()
+        
+        # Create the note
+        db_note = DBNote(
+            title=note.title,
+            content=note.content,
+            created_at=now,
+            updated_at=now
+        )
+        db.add(db_note)
+        db.commit()
+        db.refresh(db_note)
+        
+        # Create the first version
+        db_version = DBNoteVersion(
+            note_id=db_note.id,
+            title=note.title,
+            content=note.content,
+            created_at=now
+        )
+        db.add(db_version)
+        db.commit()
+        db.refresh(db_note)
+        
+        return db_note
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+    now = datetime.datetime.utcnow()
+    
+    # Create the note with all required fields
+    db_note = DBNote(
+        title=note.title,
+        content=note.content,
+        created_at=now,
+        updated_at=now,
+        versions=[]  # Initialize empty versions list
+    )
     db.add(db_note)
     db.commit()
     db.refresh(db_note)
     
-    # Create the first version of the note
+    # Create the first version
     db_version = DBNoteVersion(
         note_id=db_note.id,
         title=note.title,
-        content=note.content
+        content=note.content,
+        created_at=now
     )
     db.add(db_version)
     db.commit()
     
+    # Refresh the note to include the new version
+    db.refresh(db_note)
+    
+    # Return the note with its relationships loaded
     return db_note
 
 

@@ -1,7 +1,7 @@
 // src/services/api.ts
 import { Note, NoteVersion, NoteDiff, NoteFormData, ApiError } from '../types';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://localhost:8000';  // Remove /api since backend doesn't use it
 
 // Helper function to handle API errors
 const handleApiError = async (response: Response): Promise<any> => {
