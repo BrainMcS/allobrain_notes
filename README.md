@@ -65,7 +65,7 @@ A full-stack web application that allows users to create, edit, and manage notes
 
 2. Create a virtual environment:
    ```bash
-   python -m venv venv
+   python3 -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
@@ -90,12 +90,12 @@ A full-stack web application that allows users to create, edit, and manage notes
 
 2. Install dependencies:
    ```bash
-   npm install  # or yarn install
+   npm install
    ```
 
 3. Start the development server:
    ```bash
-   npm run dev  # or yarn dev
+   npm run dev
    ```
 
    The application will be available at http://localhost:5173
@@ -125,7 +125,7 @@ pytest
 
 # Frontend tests
 cd frontend
-npm run test  # or yarn test
+npm run test 
 ```
 
 ### Building for Production
@@ -133,7 +133,7 @@ npm run test  # or yarn test
 ```bash
 # Build the frontend
 cd frontend
-npm run build  # or yarn build
+npm run build
 
 # Serve the backend with the built frontend
 cd backend

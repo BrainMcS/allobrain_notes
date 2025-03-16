@@ -74,7 +74,7 @@ const NoteVersionDetail: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Link to={`/notes/${id}/versions`}>
+          <Link to={`/notes/${id}/history`}>
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Versions

@@ -40,15 +40,19 @@ const NoteForm: React.FC = () => {
 
     try {
       if (id) {
-        await updateNote(parseInt(id), note);
-        toast.success('Note updated successfully');
+        const updatedNote = await updateNote(parseInt(id), note);
+        if (updatedNote) {
+          toast.success('Note updated successfully');
+          navigate('/notes');
+        }
       } else {
         await createNote(note);
         toast.success('Note created successfully');
+        navigate('/notes');
       }
-      navigate('/notes');
-    } catch (err) {
-      toast.error(id ? 'Error updating note' : 'Error creating note');
+    } catch (err: any) {
+      console.error('Form submission error:', err);
+      toast.error(err.message || (id ? 'Error updating note' : 'Error creating note'));
     } finally {
       setLoading(false);
     }

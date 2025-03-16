@@ -70,67 +70,70 @@ const NoteVersions: React.FC = () => {
   if (!note) return null;
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <div>
-          <CardTitle className="text-2xl">{note.title} - Version History</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">
+    <div className="flex gap-6">
+      {/* Left Sidebar */}
+      <Card className="w-1/3 bg-gradient-to-br from-green-900 to-black min-h-[calc(100vh-8rem)]">
+        <CardHeader className="border-b border-green-600">
+          <CardTitle className="text-xl font-bold text-white text-center">Version History</CardTitle>
+          <p className="text-sm text-green-300 text-center">
             {note.versions.length} versions
           </p>
-        </div>
-        <Link to={`/notes/${note.id}`}>
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Note
-          </Button>
-        </Link>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Version</TableHead>
-              <TableHead>Modified</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {note.versions.map((version: NoteVersion, index: number) => (
-              <TableRow key={version.id}>
-                <TableCell className="font-medium">
-                  {note.versions.length - index}
-                </TableCell>
-                <TableCell>
-                  {new Date(version.created_at).toLocaleString()}
-                </TableCell>
-                <TableCell>{version.title}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-2">
-                    <Link to={`/notes/${note.id}/versions/${version.id}`}>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="mr-2 h-4 w-4" />
-                        View
-                      </Button>
-                    </Link>
-                    {index > 0 && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRestore(version.id)}
-                      >
-                        <RotateCcw className="mr-2 h-4 w-4" />
-                        Restore
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent className="p-4">
+          {note.versions.map((version: NoteVersion, index: number) => (
+            <div
+              key={version.id}
+              className="mb-3 p-3 border border-green-700 rounded-lg hover:bg-green-800 transition-colors cursor-pointer"
+            >
+              <div className="text-white font-bold">{version.title}</div>
+              <div className="text-green-200 text-sm">
+                Version {note.versions.length - index}
+              </div>
+              <div className="text-green-300 text-xs">
+                {new Date(version.created_at).toLocaleString()}
+              </div>
+              <div className="flex gap-2 mt-2">
+                <Link to={`/notes/${note.id}/history/${version.id}`} className="flex-1">
+                  <Button variant="ghost" size="sm" className="w-full hover:bg-green-700 text-white">
+                    <Eye className="mr-2 h-4 w-4" />
+                    View
+                  </Button>
+                </Link>
+                {index > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRestore(version.id)}
+                    className="flex-1 hover:bg-green-700 text-white"
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Restore
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Main Content */}
+      <Card className="flex-1 bg-gradient-to-br from-green-900 to-black">
+        <CardHeader className="flex flex-col items-center text-center space-y-4 border-b border-green-600">
+          <div>
+            <CardTitle className="text-3xl font-bold text-white">{note.title}</CardTitle>
+          </div>
+          <Link to={`/notes/${note.id}`}>
+            <Button variant="outline" size="sm" className="hover:bg-green-700 border-green-500 text-white">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Note
+            </Button>
+          </Link>
+        </CardHeader>
+        <CardContent className="p-6">
+          {/* Add your main content here */}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

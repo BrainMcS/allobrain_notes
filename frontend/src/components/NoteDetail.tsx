@@ -71,7 +71,7 @@ const NoteDetail: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Link to={`/notes/${note.id}/versions`}>
+          <Link to={`/notes/${note.id}/history`}>
             <Button variant="outline" size="sm">
               <Clock className="mr-2 h-4 w-4" />
               History
